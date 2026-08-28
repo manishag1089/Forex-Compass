@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FEMA / Forex Advisory Navigator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0E1B2E;
+    --navy-2:#142642;
+    --navy-3:#1B3253;
+    --paper:#ECE5D3;
+    --paper-2:#F6F1E4;
+    --ink:#211E17;
+    --ink-soft:#4A4536;
+    --brass:#B8862E;
+    --brass-light:#D9AE5D;
+    --signal:#AE3B30;
+    --signal-light:#D96354;
+    --sage:#516F58;
+    --sage-light:#7A9C80;
+    --mist:#9FB4C7;
+    --line: rgba(159,180,199,0.22);
+    --radius: 7px;
+    --shadow: 0 10px 30px -12px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(184,134,46,0.09), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(159,180,199,0.08), transparent 55%),
+      var(--navy);
+    color:var(--mist);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:'Fraunces', Georgia, serif; color:var(--paper-2); margin:0 0 .4em; font-weight:600; letter-spacing:.01em;}
+  code, .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:var(--brass-light);}
+  a:focus-visible, button:focus-visible, input:focus-visible{outline:2px solid var(--brass-light); outline-offset:2px;}
+  ::selection{background:var(--brass); color:#1a1305;}
+
+  /* ---------- Header ---------- */
+  .topbar{
+    padding:22px 18px 0;
+    max-width:980px; margin:0 auto;
+  }
+  .brand{display:flex; align-items:flex-start; gap:14px;}
+  .seal{
+    flex:0 0 auto; width:56px; height:56px; border-radius:50%;
+    border:2px double var(--brass-light);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:.06em;
+    color:var(--brass-light); text-align:center; line-height:1.15; padding:4px;
+    transform:rotate(-6deg);
+    background:radial-gradient(circle at 35% 30%, rgba(217,174,93,.10), transparent 70%);
+  }
+  .brand h1{font-size:1.5rem; line-height:1.15; margin-bottom:.15em;}
+  .brand p{margin:0; font-size:.86rem; color:var(--mist); opacity:.85;}
+  .verify-stamp{
+    margin-top:10px; display:inline-flex; gap:8px; align-items:center;
+    font-family:'IBM Plex Mono', monospace; font-size:.68rem; letter-spacing:.04em;
+    color:var(--sage-light); border:1px solid rgba(122,156,128,.4); border-radius:100px;
+    padding:4px 12px; text-transform:uppercase;
+  }
+  .verify-stamp .dot{width:6px;height:6px;border-radius:50%;background:var(--sage-light);}
+
+  /* ---------- Tabs ---------- */
+  .tabbar{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(var(--navy) 78%, transparent);
+    padding-top:16px; margin-top:14px;
+  }
+  .tabbar-inner{
+    max-width:980px; margin:0 auto; padding:0 18px 10px;
+    display:flex; gap:8px; overflow-x:auto; scrollbar-width:thin;
+    border-bottom:1px solid var(--line);
+  }
+  .tabbar-inner::-webkit-scrollbar{height:4px;}
+  .tabbar-inner::-webkit-scrollbar-thumb{background:var(--line);}
+  .tab-btn{
+    flex:0 0 auto; background:transparent; border:none; cursor:pointer;
+    color:var(--mist); font-family:'IBM Plex Sans'; font-size:.82rem; font-weight:500;
+    padding:9px 13px 11px; border-bottom:2px solid transparent; white-space:nowrap;
+    letter-spacing:.01em;
+  }
+  .tab-btn:hover{color:var(--paper-2);}
+  .tab-btn.active{color:var(--brass-light); border-bottom-color:var(--brass-light);}
+
+  main{max-width:980px; margin:0 auto; padding:26px 18px 80px;}
+  .panel{display:none; animation:fade .35s ease;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .lede{font-size:1rem; line-height:1.6; color:var(--mist); max-width:62ch;}
+  .section-eyebrow{font-family:'IBM Plex Mono'; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--brass-light); margin-bottom:6px; display:block;}
+
+  /* ---------- Index cards (signature element) ---------- */
+  .card{
+    background:var(--paper-2); color:var(--ink);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:18px 18px 16px; margin:14px 0; position:relative;
+    border-left:4px solid var(--brass);
+  }
+  .card.tone-sage{border-left-color:var(--sage);}
+  .card.tone-signal{border-left-color:var(--signal);}
+  .card h3{color:var(--ink); font-size:1.08rem; margin-bottom:.25em;}
+  .card p{line-height:1.55; margin:.4em 0; color:var(--ink-soft); font-size:.93rem;}
+  .card .meta-row{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px; font-family:'IBM Plex Mono'; font-size:.72rem; color:var(--ink-soft);}
+  .meta-chip{background:rgba(27,25,20,.06); padding:3px 9px; border-radius:100px;}
+
+  .stamp{
+    position:absolute; top:14px; right:14px;
+    width:64px; height:64px; border-radius:50%;
+    border:2px double currentColor; display:flex; align-items:center; justify-content:center;
+    text-align:center; font-family:'IBM Plex Mono'; font-size:8px; font-weight:600;
+    letter-spacing:.03em; text-transform:uppercase; line-height:1.1; padding:5px;
+    transform:rotate(-7deg); opacity:.88; mix-blend-mode:multiply;
+    color:var(--brass);
+  }
+  .stamp.automatic{color:var(--sage);}
+  .stamp.approval{color:var(--signal);}
+  .stamp.reporting{color:var(--brass);}
+
+  /* ---------- Hierarchy ladder ---------- */
+  .ladder{margin:26px 0;}
+  .rung{
+    background:var(--navy-3); border:1px solid var(--line); border-radius:var(--radius);
+    padding:12px 16px; margin-bottom:8px; position:relative;
+  }
+  .rung::before{
+    content:attr(data-tier); position:absolute; left:-1px; top:-9px;
+    font-family:'IBM Plex Mono'; font-size:.62rem; letter-spacing:.1em;
+    color:var(--brass-light); background:var(--navy); padding:0 6px; text-transform:uppercase;
+  }
+  .rung h4{color:var(--paper-2); font-size:.95rem; margin:2px 0 3px;}
+  .rung p{margin:0; font-size:.83rem; color:var(--mist); line-height:1.5;}
+  .rung:nth-child(1){margin-left:0; width:100%;}
+  .rung:nth-child(2){margin-left:4%; width:96%;}
+  .rung:nth-child(3){margin-left:8%; width:92%;}
+  .rung:nth-child(4){margin-left:12%; width:88%;}
+  .rung:nth-child(5){margin-left:16%; width:84%;}
+
+  /* ---------- Stat strip ---------- */
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:18px 0;}
+  .stat{background:var(--navy-3); border:1px solid var(--line); border-radius:var(--radius); padding:12px 10px; text-align:center;}
+  .stat .num{font-family:'Fraunces'; font-size:1.5rem; color:var(--brass-light); display:block; line-height:1.1;}
+  .stat .lbl{font-size:.68rem; color:var(--mist); text-transform:uppercase; letter-spacing:.05em;}
+
+  /* ---------- Disclaimer box ---------- */
+  .disclaimer{
+    border:1px solid rgba(174,59,48,.4); background:rgba(174,59,48,.08);
+    border-radius:var(--radius); padding:14px 16px; margin:20px 0; font-size:.85rem; color:var(--mist); line-height:1.55;
+  }
+  .disclaimer strong{color:var(--signal-light);}
+
+  /* ---------- Forms table ---------- */
+  .table-wrap{overflow-x:auto; margin:16px 0; border-radius:var(--radius); border:1px solid var(--line);}
+  table{width:100%; border-collapse:collapse; min-width:640px; background:var(--navy-2);}
+  th,td{text-align:left; padding:10px 12px; font-size:.82rem; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{font-family:'IBM Plex Mono'; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--brass-light);}
+  td{color:var(--mist);}
+  td.code{font-family:'IBM Plex Mono'; color:var(--paper-2); font-weight:600; white-space:nowrap;}
+  tr:last-child td{border-bottom:none;}
+
+  /* ---------- Scenario finder ---------- */
+  .search-wrap{position:relative; margin:8px 0 6px;}
+  #scenarioSearch{
+    width:100%; padding:14px 16px; font-size:.95rem; border-radius:100px;
+    border:1px solid var(--line); background:var(--navy-3); color:var(--paper-2);
+    font-family:'IBM Plex Sans';
+  }
+  #scenarioSearch::placeholder{color:var(--mist); opacity:.65;}
+  .chips{display:flex; flex-wrap:wrap; gap:7px; margin:12px 0 6px;}
+  .chip{
+    background:transparent; border:1px solid var(--line); color:var(--mist);
+    border-radius:100px; padding:6px 12px; font-size:.75rem; cursor:pointer; font-family:'IBM Plex Sans';
+  }
+  .chip:hover{border-color:var(--brass-light); color:var(--brass-light);}
+  #resultsMeta{font-size:.75rem; color:var(--mist); opacity:.7; margin:14px 0 4px; font-family:'IBM Plex Mono';}
+  .steps{margin:6px 0 4px; padding-left:20px;}
+  .steps li{margin-bottom:7px; line-height:1.5; font-size:.9rem;}
+  .tag-row{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
+  .tag{background:rgba(81,111,88,.14); color:var(--sage); border:1px solid rgba(81,111,88,.35); border-radius:100px; padding:3px 10px; font-size:.72rem; font-family:'IBM Plex Mono';}
+  .caution-box{border:1px solid rgba(174,59,48,.35); background:rgba(174,59,48,.07); border-radius:6px; padding:10px 13px; margin-top:10px; font-size:.83rem; color:var(--ink-soft);}
+  .caution-box strong{color:var(--signal);}
+  .cite-row{margin-top:8px; font-size:.78rem; color:var(--ink-soft); font-family:'IBM Plex Mono'; line-height:1.6;}
+
+  footer{max-width:980px; margin:0 auto; padding:0 18px 50px; font-size:.75rem; color:var(--mist); opacity:.6; line-height:1.6;}
+
+  @media (max-width:560px){
+    .stats{grid-template-columns:repeat(3,1fr);}
+    .stat .num{font-size:1.15rem;}
+    .rung:nth-child(2){margin-left:2%; width:98%;}
+    .rung:nth-child(3){margin-left:4%; width:96%;}
+    .rung:nth-child(4){margin-left:6%; width:94%;}
+    .rung:nth-child(5){margin-left:8%; width:92%;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .panel{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="seal">FX<br>REG<br>1999</div>
+    <div>
+      <h1>FEMA / Forex Advisory Navigator</h1>
+      <p>Internal reference — capital account transactions, LRS, ODI, FDI, ECB &amp; compliance forms</p>
+    </div>
+  </div>
+  <span class="verify-stamp"><span class="dot"></span>Snapshot compiled Aug 2026 — verify volatile figures against live RBI text</span>
+</div>
+
+<nav class="tabbar"><div class="tabbar-inner" id="tabbarInner">
+  <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="directions">Master Directions</button>
+  <button class="tab-btn" data-tab="lrs">LRS</button>
+  <button class="tab-btn" data-tab="odi">ODI</button>
+  <button class="tab-btn" data-tab="fdi">FDI</button>
+  <button class="tab-btn" data-tab="ecb">ECB</button>
+  <button class="tab-btn" data-tab="forms">Forms &amp; Calendar</button>
+  <button class="tab-btn" data-tab="finder">Scenario Finder</button>
+  <button class="tab-btn" data-tab="sources">Sources</button>
+</div></nav>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <section class="panel active" id="panel-overview">
+    <span class="section-eyebrow">How the law is layered</span>
+    <h2>One statute, five layers of instruments</h2>
+    <p class="lede">FEMA advice usually goes wrong not because the law is unknown, but because the wrong layer is quoted. Master Directions instruct AD banks — the actual entitlement often sits one or two layers up, in Rules made by the Central Government or Regulations made by RBI.</p>
+
+    <div class="ladder">
+      <div class="rung" data-tier="Tier 1 · Parliament"><h4>FEMA Act, 1999</h4><p>The parent statute. Defines capital vs current account transactions and delegates rule/regulation-making power.</p></div>
+      <div class="rung" data-tier="Tier 2 · Central Government Rules"><h4>NDI Rules 2019 (FDI) · OI Rules 2022 (ODI)</h4><p>Made by the Ministry of Finance under Sec. 46 — this is where entry routes, sectoral caps and the round-tripping layering test actually live.</p></div>
+      <div class="rung" data-tier="Tier 3 · RBI Regulations"><h4>OI Regulations 2022 · Borrowing &amp; Lending Regs 2018 · NDI Reporting Regs 2019</h4><p>Made by RBI under Sec. 47, gazetted with a FEMA notification number (e.g. FEMA 400/2022-RB).</p></div>
+      <div class="rung" data-tier="Tier 4 · Master Directions"><h4>~14 FED Master Directions</h4><p>Consolidated operating instructions to Authorised Dealer banks — one per topic (LRS, Overseas Investment, ECB, Foreign Investment, Reporting, etc.), each carrying an "updated as on" date.</p></div>
+      <div class="rung" data-tier="Tier 5 · Circulars &amp; Notifications"><h4>A.P. (DIR Series) Circulars · FEMA Notifications · DPIIT Press Notes</h4><p>The actual amendment mechanism. If a Master Direction feels stale, this is the layer to check first.</p></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num">USD 250k</span><span class="lbl">LRS annual limit / individual</span></div>
+      <div class="stat"><span class="num">400%</span><span class="lbl">ODI automatic-route net-worth cap</span></div>
+      <div class="stat"><span class="num">2 layers</span><span class="lbl">Round-trip subsidiary test</span></div>
+    </div>
+
+    <div class="disclaimer"><strong>Read before relying on this.</strong> This is a static internal snapshot, not a live feed — a plain HTML file has no way to poll RBI's servers on its own. Figures that change frequently (LRS limits, ODI net-worth caps, ECB maturity/cost ceilings, TCS rates) are flagged throughout — confirm the current value on the linked RBI page before advising a client. See the <strong>Sources</strong> tab for how to keep this current.</div>
+  </section>
+
+  <!-- MASTER DIRECTIONS -->
+  <section class="panel" id="panel-directions">
+    <span class="section-eyebrow">Tier 4 — RBI FED Master Directions</span>
+    <h2>The core forex Master Directions</h2>
+    <p class="lede">Originally consolidated 1 January 2016 from years of A.P. (DIR Series) circulars, and re-issued whenever amended. The badge shows the dominant compliance route for that topic — many directions mix routes by transaction type.</p>
+    <div id="mdList"></div>
+
+    <h3 style="margin-top:28px;">Governing Rules &amp; Regulations behind the Directions</h3>
+    <div id="rulesList"></div>
+  </section>
+
+  <!-- LRS -->
+  <section class="panel" id="panel-lrs">
+    <span class="section-eyebrow">FED MD 7/2015-16 · Individuals only</span>
+    <h2>Liberalised Remittance Scheme</h2>
+    <p class="lede">The only outward-remittance facility available to <em>resident individuals</em> as such — not to corporates, partnership firms, HUFs (for most purposes) or trusts.</p>
+
+    <div class="card tone-sage">
+      <span class="stamp automatic">Automatic<br>within<br>limit</span>
+      <h3>The headline number</h3>
+      <p><strong>USD 250,000 per Financial Year</strong>, per resident individual, cumulative across <em>all</em> AD banks and across both current- and capital-account uses combined. Remittance beyond this needs specific prior RBI permission. <em>Confirm this figure is still current — it is periodically revised by RBI circular.</em></p>
+    </div>
+
+    <div class="card">
+      <h3>Permissible current-account uses</h3>
+      <p>Private visits · gifts and donations · going abroad for employment or emigration · maintenance of close relatives abroad · business trips · medical treatment abroad · studies abroad (including self-funded).</p>
+    </div>
+
+    <div class="card">
+      <h3>Permissible capital-account uses</h3>
+      <p>Opening and maintaining a foreign currency account abroad · purchase of immovable property abroad · Overseas Portfolio Investment (OPI) in listed foreign shares/debt · extending loans to NRI relatives · funding an overseas subsidiary's equity as part of an ODI structure (subject to the ODI framework applying to that portion).</p>
+    </div>
+
+    <div class="card tone-signal">
+      <span class="stamp approval">Prohibited</span>
+      <h3>Prohibited uses</h3>
+      <p>Margin trading and lottery/betting remittances · purchase of Foreign Currency Convertible Bonds in the secondary market · remittance to FATF non-cooperative jurisdictions · trading in foreign exchange abroad · purchase of any item specifically restricted under the current Foreign Trade Policy.</p>
+    </div>
+
+    <div class="card">
+      <h3>Documentation</h3>
+      <div class="meta-row"><span class="meta-chip">Form A2</span><span class="meta-chip">PAN mandatory</span><span class="meta-chip">Purpose code required</span><span class="meta-chip">AD-bank due diligence</span></div>
+      <p>Tax Collected at Source (TCS) applies under the Income-Tax Act above prescribed thresholds, with a lower rate typically for education funded through an education loan — <em>verify the current TCS slab, since Finance Act amendments change these rates most years.</em></p>
+    </div>
+  </section>
+
+  <!-- ODI -->
+  <section class="panel" id="panel-odi">
+    <span class="section-eyebrow">OI Rules/Regulations/Directions 2022 · FED MD 15/2024-25</span>
+    <h2>Overseas Direct Investment</h2>
+    <p class="lede">Governs an Indian Party's "financial commitment" — equity, debt, or guarantees — to or on behalf of a Foreign Entity. Effective from the 22 August 2022 overhaul that replaced the old ODI Regulations.</p>
+
+    <div class="card">
+      <span class="stamp automatic">Automatic<br>route</span>
+      <h3>Automatic route ceiling</h3>
+      <p>Financial commitment up to <strong>400% of the Indian Party's net worth</strong> (per its last audited balance sheet) is generally permitted without prior approval, subject to no adverse report against the Indian Party and other standard conditions. <em>This cap and the definition of "financial commitment" are exactly the kind of figure to re-verify against the live Master Direction — it has moved before.</em></p>
+    </div>
+
+    <div class="card tone-signal">
+      <span class="stamp approval">Approval<br>route</span>
+      <h3>When prior approval is needed instead</h3>
+      <p>Commitment exceeding the automatic-route ceiling · investment into countries/sectors specifically restricted by RBI · the Foreign Entity is engaged in real estate or banking business (beyond permitted exceptions) · the structure fails the round-tripping layering test below.</p>
+    </div>
+
+    <div class="card">
+      <h3>The round-tripping / layering test — Rule 19(3)</h3>
+      <p>An Indian Party cannot make a financial commitment to a Foreign Entity that has already invested, or is investing, into India if doing so creates a structure with <strong>more than two layers of subsidiaries</strong> counted from the Indian Party. Within two layers, round-trip structures sit on the automatic route; beyond that, prior RBI approval is required.</p>
+    </div>
+
+    <div class="card">
+      <h3>Documentation &amp; ongoing compliance</h3>
+      <div class="meta-row"><span class="meta-chip">Form FC → generates UIN</span><span class="meta-chip">APR due 31 December</span><span class="meta-chip">Disinvestment report within 30 days</span></div>
+      <p>Form FC is filed through the Authorised Dealer (via the RBI OID application) before or at the time of the first financial commitment, generating a Unique Identification Number (UIN) for that Foreign Entity. An <strong>Annual Performance Report</strong> is then due every 31 December for as long as the entity exists — including when it is dormant or under liquidation — until formal closure is reported. A missed APR is the single most common trigger for compounding proceedings and blocks fresh ODI until regularised.</p>
+    </div>
+  </section>
+
+  <!-- FDI -->
+  <section class="panel" id="panel-fdi">
+    <span class="section-eyebrow">NDI Rules 2019 · FED MD 11/2017-18</span>
+    <h2>Foreign Investment in India</h2>
+    <p class="lede">Inbound equity investment is governed by the Non-Debt Instruments Rules 2019 (a Central Government rule, not an RBI regulation) — this is why FDI policy changes (Press Notes) come from DPIIT/Ministry of Commerce, not only from RBI.</p>
+
+    <div class="card">
+      <span class="stamp automatic">Automatic<br>route</span>
+      <h3>Automatic vs Government route</h3>
+      <p>Most sectors sit on the automatic route (no prior approval, only post-facto reporting). Government-route approval is required for specified sectors (defence beyond caps, certain media, multi-brand retail nuances) and — critically — for <strong>any investment where the beneficial owner is situated in, or is a citizen of, a country sharing a land border with India</strong> (Press Note 3 of 2020), regardless of sector or amount.</p>
+    </div>
+
+    <div class="card">
+      <h3>What counts as "FDI" — capital instruments</h3>
+      <p>Equity shares, fully and mandatorily convertible debentures, and fully and mandatorily convertible preference shares. Anything <em>optionally</em> convertible or non-convertible is treated as debt — it falls outside the NDI Rules and typically into the ECB framework instead.</p>
+    </div>
+
+    <div class="card">
+      <h3>Pricing guidelines</h3>
+      <p>Issue or transfer price must not be less than fair value on a resident-to-non-resident transaction, and not more than fair value on a non-resident-to-resident transaction, determined under an internationally accepted pricing methodology by a SEBI-registered merchant banker or a practising Chartered Accountant.</p>
+    </div>
+
+    <div class="card">
+      <h3>Documentation — filed via the FIRMS portal</h3>
+      <div class="meta-row"><span class="meta-chip">FC-GPR — 30 days</span><span class="meta-chip">FC-TRS — 60 days</span><span class="meta-chip">DI (downstream)</span><span class="meta-chip">FLA — by 15 July</span></div>
+      <p>The Entity Master Form (EMF) must be current before any transaction form is filed. FC-GPR reports a fresh issue of capital instruments to a non-resident within 30 days of allotment; FC-TRS reports a transfer of capital instruments between a resident and non-resident within 60 days. An Indian company that is itself owned/controlled by non-residents and invests further into another Indian company must report that as a <strong>downstream investment</strong> (Form DI), applying the same sectoral conditions all over again.</p>
+    </div>
+  </section>
+
+  <!-- ECB -->
+  <section class="panel" id="panel-ecb">
+    <span class="section-eyebrow">FEM (Borrowing &amp; Lending) Regs 2018 · FED MD 5/2018-19</span>
+    <h2>External Commercial Borrowings</h2>
+    <p class="lede">Two tracks — Foreign Currency denominated ECB and INR-denominated ECB — each with its own eligible-borrower list, recognised-lender list, minimum maturity and end-use restrictions.</p>
+
+    <div class="card">
+      <h3>Minimum Average Maturity &amp; cost ceiling</h3>
+      <p>Typically <strong>3 years</strong> minimum average maturity, shortened to around 1 year for manufacturing-sector borrowers up to a prescribed threshold, and generally 5 years where the lender is a foreign equity holder and proceeds fund working capital, general corporate purposes, or repayment of INR loans. All-in-cost is capped at a benchmark rate (now SOFR-based, post-LIBOR transition) plus a prescribed spread. <em>Both the maturity table and the spread are revised periodically — verify against the current Master Direction before quoting a figure to a client.</em></p>
+    </div>
+
+    <div class="card tone-signal">
+      <span class="stamp approval">Negative<br>list</span>
+      <h3>End-use restrictions</h3>
+      <p>ECB proceeds generally cannot fund real estate activity (barring specific exceptions), pure working capital or general corporate purposes outside the specific permitted track/tenure, on-lending for such restricted purposes, or repayment of existing rupee loans except where explicitly permitted.</p>
+    </div>
+
+    <div class="card">
+      <h3>Documentation</h3>
+      <div class="meta-row"><span class="meta-chip">Form ECB → LRN</span><span class="meta-chip">Form ECB-2 monthly</span><span class="meta-chip">Filed via CIMS</span><span class="meta-chip">7 working days of month-end</span></div>
+      <p>Form ECB is filed through the Authorised Dealer bank before drawdown, generating a Loan Registration Number (LRN) — drawdown cannot happen without it. Thereafter, a monthly Form ECB-2 return is due within 7 working days of month-end, now filed on RBI's CIMS platform. Late filing of either attracts a Late Submission Fee, and any change in terms requires a revised Form ECB.</p>
+    </div>
+  </section>
+
+  <!-- FORMS & CALENDAR -->
+  <section class="panel" id="panel-forms">
+    <span class="section-eyebrow">Reporting under FEMA · FED MD 18/2015-16</span>
+    <h2>Forms &amp; compliance calendar</h2>
+    <p class="lede">Every form below is filed through an Authorised Dealer bank unless a portal is named directly. Deadlines are the single most compounding-prone detail in FEMA practice — this table exists to be checked, not memorised.</p>
+    <div class="table-wrap">
+      <table id="formsTable">
+        <thead><tr><th>Form</th><th>Instrument</th><th>Purpose</th><th>Filed via</th><th>Deadline</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SCENARIO FINDER -->
+  <section class="panel" id="panel-finder">
+    <span class="section-eyebrow">Type what you're looking for</span>
+    <h2>Scenario Finder</h2>
+    <p class="lede">A keyword-matched case-file lookup across the scenarios below — try "ODI to FDI swap", "missed APR", "NRI buying property", or "ECB working capital".</p>
+    <div class="search-wrap">
+      <input type="text" id="scenarioSearch" placeholder="Type a transaction, e.g. 'ODI to FDI swap'…" autocomplete="off">
+    </div>
+    <div class="chips" id="chipRow"></div>
+    <div id="resultsMeta"></div>
+    <div id="resultsArea"></div>
+  </section>
+
+  <!-- SOURCES -->
+  <section class="panel" id="panel-sources">
+    <span class="section-eyebrow">Keeping this current</span>
+    <h2>Sources &amp; how to verify</h2>
+    <p class="lede">A single HTML file cannot poll RBI's servers by itself — there is no background process to run it. What it <em>can</em> do is get you to the right live page in one tap, every time.</p>
+
+    <div class="card">
+      <h3>Official RBI sources</h3>
+      <p>
+        <a href="https://m.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=10192" target="_blank" rel="noopener">RBI — Master Directions index</a><br>
+        <a href="https://m.rbi.org.in/scripts/BS_FemaNotifications.aspx?Id=155" target="_blank" rel="noopener">RBI — FEMA Notifications index</a><br>
+        <a href="https://www.rbi.org.in/notifications_rss.xml" target="_blank" rel="noopener">RBI — Notifications RSS feed</a><br>
+        <a href="https://firms.rbi.org.in" target="_blank" rel="noopener">FIRMS portal (FDI reporting)</a>
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Private/secondary references (for interpretation, not authority)</h3>
+      <p><a href="https://www.finstackk.com/articles/fema-lrs-odi-fdi-ecb-global-transactions" target="_blank" rel="noopener">finstackk.com — FEMA/LRS/ODI/FDI/ECB explainer</a> and equivalents from Taxmann, TaxGuru, and Big-Four FEMA alerts are useful for plain-English framing and for catching amendments quickly, but always trace their claims back to the actual Rule, Regulation or Master Direction before advising on it.</p>
+    </div>
+
+    <div class="disclaimer">
+      <strong>If you want this to actually self-update:</strong> that requires a small backend — a scheduled job polling the RSS feed above plus the handful of Master Direction pages, re-embedding changed text, and flagging you for sign-off before anything is treated as advisory-grade. A solo-buildable version of that pipeline is Next.js + Supabase (pgvector) + Vercel Cron + the Claude API. This file is the content/reference layer that pipeline would feed — worth keeping as the offline fallback either way.
+    </div>
+
+    <div class="disclaimer">
+      <strong>Not legal advice.</strong> Built as an internal working reference. Figures and dates were compiled from RBI publications and reputable secondary sources as of the date stamped at the top of this page; RBI amends Master Directions frequently. Verify anything material — and especially any structuring involving round-tripping, swaps, or a restricted-country nexus — against the live official text, your AD bank, or independent counsel before it goes into client advice.
+    </div>
+  </section>
+
+</main>
+
+<footer>FEMA / Forex Advisory Navigator — internal reference tool. Not published or endorsed by the Reserve Bank of India. Compiled from RBI Master Directions, FEMA Rules/Regulations and secondary professional sources; verify before relying on it.</footer>
+
+<script>
+/* ---------------- DATA ---------------- */
+const masterDirections = [
+  {code:"FED MD 7/2015-16", title:"Liberalised Remittance Scheme", updated:"Sept 2024", cat:"Outward · Individuals", route:"automatic", scope:"The USD 250,000/year outward remittance facility for resident individuals — current and capital account uses."},
+  {code:"FED MD 15/2024-25", title:"Overseas Investment", updated:"Jul 2024 (re-issued)", cat:"Outward · Entities", route:"approval", scope:"Consolidates the 2022 ODI overhaul — financial commitment limits, round-tripping test, Form FC/APR."},
+  {code:"FED MD 5/2018-19", title:"ECB, Trade Credits & Structured Obligations", updated:"Feb 2026", cat:"Inbound Borrowing", route:"approval", scope:"Two-track ECB framework, maturity/cost ceilings, end-use restrictions, Form ECB/ECB-2."},
+  {code:"FED MD 11/2017-18", title:"Foreign Investment in India", updated:"2026", cat:"Inbound Equity", route:"automatic", scope:"Entry routes, sectoral caps, pricing guidelines, capital instruments definition for FDI."},
+  {code:"FED MD 18/2015-16", title:"Reporting under FEMA, 1999", updated:"Jun 2026", cat:"Compliance", route:"reporting", scope:"The master list of all FEMA reporting forms, portals and timelines."},
+  {code:"FED MD 4/2015-16", title:"Compounding of Contraventions", updated:"May 2022", cat:"Enforcement", route:"reporting", scope:"Process for regularising a FEMA breach — missed APRs, late filings, procedural lapses."},
+  {code:"FED MD 16/2015-16", title:"Export of Goods and Services", updated:"Jul 2026", cat:"Trade", route:"automatic", scope:"Realisation and repatriation timelines for export proceeds."},
+  {code:"FED MD 17/2016-17", title:"Import of Goods and Services", updated:"Jan 2026", cat:"Trade", route:"automatic", scope:"Advance remittance, evidence of import, and related AD-bank obligations."},
+  {code:"FED MD 3/2015-16", title:"Money Changing Activities", updated:"Apr 2026", cat:"Licensing", route:"approval", scope:"Licensing conditions for authorised money-changers and FFMCs."},
+  {code:"FED MD 10/2015-16", title:"Establishment of BO/LO/PO in India", updated:"May 2021", cat:"Inbound Presence", route:"approval", scope:"Branch/Liaison/Project office set-up by a foreign entity in India."},
+  {code:"FED MD 14/2015-16", title:"Deposits and Accounts (NRE/NRO/FCNR)", updated:"Oct 2025", cat:"Banking", route:"automatic", scope:"Rules for NRI/PIO bank accounts and repatriability of balances."},
+  {code:"FED MD 8/2015-16", title:"Other Remittance Facilities", updated:"Jan 2026", cat:"Outward · Individuals", route:"automatic", scope:"Remittance facilities outside LRS — e.g. for specific current-account purposes."},
+  {code:"FED MD 12/2015-16", title:"Acquisition & Transfer of Immovable Property in India", updated:"Sept 2022", cat:"Property", route:"automatic", scope:"NRI/OCI purchase and sale of Indian property, and repatriation of proceeds."},
+  {code:"FED MD 9/2015-16", title:"Insurance", updated:"Dec 2021", cat:"Sector-specific", route:"approval", scope:"FDI and forex rules specific to the insurance sector."}
+];
+
+const rulesList = [
+  {code:"NDI Rules, 2019", title:"Non-Debt Instruments Rules", scope:"Central Government rule governing FDI — entry routes, sectoral caps, capital instruments, and (via Rule 9A, inserted Aug 2024) FDI-side share-swap structuring."},
+  {code:"OI Rules, 2022", title:"Overseas Investment Rules", scope:"Central Government rule governing ODI, alongside the RBI-made OI Regulations 2022 (FEMA 400/2022-RB) and OI Directions 2022 — effective 22 Aug 2022."},
+  {code:"FEM (Borrowing & Lending) Regs, 2018", title:"ECB Regulations", scope:"RBI regulation underlying the ECB Master Direction — eligible borrowers, recognised lenders, tracks."},
+  {code:"NDI Reporting Regs, 2019", title:"Mode of Payment & Reporting of NDI Regulations", scope:"RBI regulation specifying how FDI payment and reporting must flow — the basis for FC-GPR/FC-TRS."}
+];
+
+const forms = [
+  ["Form A2","LRS","Remittance declaration for each outward transfer","AD Bank","At time of each remittance"],
+  ["FC-GPR","FDI","Report issue of capital instruments to a non-resident","FIRMS / SMF","Within 30 days of allotment"],
+  ["FC-TRS","FDI","Report transfer of capital instruments, resident ↔ non-resident","FIRMS / SMF","Within 60 days of transfer"],
+  ["Form DI","FDI (downstream)","Report downstream investment by a non-resident-owned Indian co.","FIRMS / SMF","Within 30 days"],
+  ["CN Form","FDI (startups)","Report convertible notes issued to a non-resident investor","FIRMS / SMF","Within 30 days"],
+  ["ESOP Form","FDI","Report ESOPs issued to non-resident employees","FIRMS / SMF","Within 30 days"],
+  ["FLA Return","FDI (annual)","Annual Foreign Liabilities and Assets return","RBI FLAIR portal","By 15 July annually"],
+  ["Form FC","ODI","Financial commitment report — generates the UIN for a foreign entity","AD Bank / OID application","Before/at first remittance"],
+  ["APR","ODI (annual)","Annual Performance Report for each foreign entity","OID application","By 31 December annually"],
+  ["Disinvestment Report","ODI","Report disposal/closure of a foreign entity","OID application","Within 30 days of disinvestment"],
+  ["Form ECB","ECB","Loan registration — generates the LRN before drawdown","AD Bank → RBI (CIMS)","Before drawdown"],
+  ["Form ECB-2","ECB (monthly)","Monthly return of ECB transactions","CIMS","Within 7 working days of month-end"]
+];
+
+const scenarios = [
+  {
+    id:"odi-fdi-swap",
+    title:"ODI–FDI swap / round-trip structuring",
+    keywords:["odi to fdi swap","odi fdi swap","round trip","round-tripping","share swap","equity swap","swap of shares","cross border swap","externalisation","flip structure","two layer","layering","rule 19","swap of securities"],
+    tags:["ODI","FDI","Structuring"],
+    summary:"Structuring where an outbound ODI leg and an inbound FDI leg interact — either round-tripping (a foreign entity you've invested in loops back into India) or a direct swap of shares between an Indian and a foreign company.",
+    steps:[
+      "Map both legs separately first: what is being contributed to/received from the foreign entity (ODI leg), and what Indian equity is being issued/transferred in exchange (FDI leg).",
+      "Run the Rule 19(3) layering test on the ODI leg — count subsidiary layers from the Indian Party; more than two layers back into India needs prior RBI approval, not automatic route.",
+      "Confirm the FDI leg is eligible for the automatic route under NDI Rules Rule 9A (in force since 16 Aug 2024), which permits equity-instrument transfers against a swap of foreign equity capital, subject to full compliance with the OI Rules on the ODI side.",
+      "Get dual valuation — both the Indian and the foreign entity — from a SEBI-registered Category-I Merchant Banker; arm's-length pricing is mandatory for a swap, not just a cash subscription.",
+      "File both legs: Form FC (+ eventual APR) for the ODI leg, and FC-GPR or FC-TRS via FIRMS for the FDI leg.",
+      "Flag for AD-bank/RBI confirmation before executing — layer-counting and downstream FOCC treatment are areas where AD banks still take differing positions."
+    ],
+    formsRef:["Form FC","APR","FC-GPR or FC-TRS"],
+    citations:["OI Rules 2022 — Rule 19(3) (layering/round-trip test)","NDI Rules 2019 — Rule 9A, inserted by the Fourth Amendment Rules (16 Aug 2024)","OI Regulations 2022 — swap of securities provisions"],
+    caution:"This is the single most amendment-sensitive scenario in the whole framework — Rule 9A only opened the automatic route for this in August 2024. Confirm nothing has moved again since, and get written AD-bank sign-off before executing."
+  },
+  {
+    id:"lrs-remittance",
+    title:"Sending money abroad under LRS",
+    keywords:["lrs","liberalised remittance","send money abroad","remit funds individual","overseas education","gift abroad","foreign travel","opi","overseas portfolio investment","maintenance of relatives"],
+    tags:["LRS","Individuals"],
+    summary:"A resident individual wants to remit funds abroad — for education, travel, gifting, medical treatment, or to invest in listed foreign securities (OPI).",
+    steps:[
+      "Confirm the remitter is a resident individual (not a firm, HUF for most purposes, or trust) and check cumulative LRS usage for the financial year across all AD banks.",
+      "Classify the purpose against the current/capital account lists — most personal purposes are automatic-route within the USD 250,000 annual cap.",
+      "Complete Form A2 with the correct purpose code through the AD bank; PAN is mandatory.",
+      "Check TCS applicability and current rate for that purpose under the Income-Tax Act before the remittance is processed.",
+      "If the purpose is OPI (buying listed foreign shares/debt), separately confirm it doesn't tip into ODI territory (i.e., doesn't cross the 10% / control thresholds that would reclassify it as direct investment)."
+    ],
+    formsRef:["Form A2"],
+    citations:["FED MD 7/2015-16 — Liberalised Remittance Scheme"],
+    caution:"The LRS limit and TCS rates are both revised periodically — re-check the current figures before quoting them to a client."
+  },
+  {
+    id:"odi-setup",
+    title:"Setting up or investing in a subsidiary/JV abroad",
+    keywords:["odi","overseas direct investment","foreign subsidiary","wos abroad","joint venture abroad","set up company abroad","invest abroad entity","financial commitment"],
+    tags:["ODI"],
+    summary:"An Indian entity wants to set up a wholly-owned subsidiary or joint venture abroad, or increase its financial commitment to an existing one.",
+    steps:[
+      "Compute the Indian Party's net worth from its last audited balance sheet and check the proposed financial commitment against the automatic-route ceiling.",
+      "Confirm the foreign entity's activity isn't in a restricted category (real estate, banking, beyond permitted exceptions) and isn't in a country RBI has flagged.",
+      "If the foreign entity will itself hold Indian investments or step-down subsidiaries, run the Rule 19(3) two-layer round-trip test.",
+      "File Form FC via the AD bank before/at the first remittance to obtain a UIN for the foreign entity.",
+      "Calendar the 31 December APR deadline for every year the entity exists — including dormant years — until formal closure is reported."
+    ],
+    formsRef:["Form FC","APR"],
+    citations:["OI Rules/Regulations/Directions 2022","FED MD 15/2024-25 — Overseas Investment"],
+    caution:"A missed APR is the most common trigger for compounding and will block further ODI by the same Indian Party until regularised."
+  },
+  {
+    id:"fdi-automatic",
+    title:"Foreign investor investing in your Indian company — automatic route",
+    keywords:["fdi automatic route","foreign investment india","issue shares to foreign investor","fc-gpr","raise foreign capital","capital instruments"],
+    tags:["FDI"],
+    summary:"A foreign investor wants to subscribe to equity, CCPS or CCDs in an Indian company in a sector that sits on the automatic route.",
+    steps:[
+      "Confirm the sector is on the automatic route and there's no land-border-country nexus in the beneficial ownership chain (which would force the government route regardless of sector).",
+      "Confirm the instrument is a genuine 'capital instrument' — equity shares, or fully/mandatorily convertible debentures/preference shares. Optionally convertible instruments are debt, not FDI.",
+      "Get a fair-value pricing certificate from a SEBI-registered merchant banker or CA — issue price cannot be below fair value.",
+      "Ensure the Entity Master Form on FIRMS is current, then file FC-GPR within 30 days of allotment.",
+      "If the Indian company is itself foreign-owned/controlled and this is a further downstream investment, file Form DI as well and re-check sectoral conditions apply at that level too."
+    ],
+    formsRef:["FC-GPR","Form DI (if downstream)"],
+    citations:["NDI Rules 2019","FED MD 11/2017-18 — Foreign Investment in India"],
+    caution:"Confirm beneficial ownership all the way up the investor's chain — Press Note 3's land-border-country rule looks through intermediate holding entities."
+  },
+  {
+    id:"fdi-government-route",
+    title:"FDI in a restricted sector or from a land-bordering country",
+    keywords:["fdi government route","press note 3","china investment","land border country","restricted sector fdi","prior approval fdi","beneficial owner"],
+    tags:["FDI","Approval Route"],
+    summary:"The investment triggers government-route approval — either because of the sector, or because the investor's beneficial ownership traces to a country sharing a land border with India.",
+    steps:[
+      "Identify the ultimate beneficial owner(s) of the investing entity, not just the immediate shareholder.",
+      "If any beneficial owner is a citizen of, or based in, a land-bordering country, government approval is required regardless of sector or investment size (Press Note 3, 2020).",
+      "Route the application through the relevant administrative ministry/department via the Government's FDI approval portal.",
+      "Do not proceed to FC-GPR filing until approval is granted — automatic-route reporting timelines don't apply until the transaction is actually permitted."
+    ],
+    formsRef:["FC-GPR (post-approval)"],
+    citations:["NDI Rules 2019","DPIIT Press Note 3 of 2020"],
+    caution:"This is a policy-sensitive, frequently-litigated area — confirm current DPIIT guidance directly rather than relying on a general summary."
+  },
+  {
+    id:"ecb-loan",
+    title:"Raising a foreign currency loan (ECB)",
+    keywords:["ecb","external commercial borrowing","foreign currency loan","overseas loan","form ecb","lrn","trade credit","working capital loan abroad"],
+    tags:["ECB"],
+    summary:"An eligible Indian borrower wants to raise debt from a recognised overseas lender.",
+    steps:[
+      "Confirm the borrower is in the eligible-borrower list and the lender is a recognised lender under the applicable track.",
+      "Check the proposed tenure against the current Minimum Average Maturity table for that end-use category.",
+      "Confirm the intended end-use isn't on the negative list (real estate, general working capital outside the permitted track, on-lending for restricted purposes).",
+      "Check the all-in-cost against the current benchmark-plus-spread ceiling.",
+      "File Form ECB via the AD bank before drawdown to obtain the LRN, then calendar the monthly Form ECB-2 return."
+    ],
+    formsRef:["Form ECB","Form ECB-2"],
+    citations:["FEM (Borrowing and Lending) Regulations, 2018","FED MD 5/2018-19"],
+    caution:"Maturity tables and cost ceilings are revised periodically — re-verify both before structuring the loan terms."
+  },
+  {
+    id:"compounding",
+    title:"Missed a filing deadline — regularisation",
+    keywords:["compounding","missed apr","late filing fema","contravention","regularise fema","lsf","late submission fee","condonation"],
+    tags:["Enforcement"],
+    summary:"A deadline was missed — an APR, FC-GPR, FC-TRS, or ECB-2 return — and the client needs to regularise the position.",
+    steps:[
+      "Identify exactly which filing was missed and for how long — the delay window drives whether a Late Submission Fee suffices or full compounding is needed.",
+      "For FDI/ODI reporting delays within the LSF-eligible window, the AD bank can often process the late filing directly against payment of the fee.",
+      "For longer delays or more serious contraventions, file a compounding application with the relevant RBI Regional Office (or Directorate of Enforcement for certain categories) under the Compounding of Contraventions framework.",
+      "Continue current-period compliance in parallel — a compounding application for a past delay doesn't pause the next filing's deadline."
+    ],
+    formsRef:["Compounding application","LSF payment (via AD bank)"],
+    citations:["FED MD 4/2015-16 — Compounding of Contraventions"],
+    caution:"Don't let a client sit on a known lapse — the compounding cost generally scales with how long the contravention has continued."
+  },
+  {
+    id:"nri-property",
+    title:"NRI/OCI buying or selling property in India",
+    keywords:["nri property","immovable property acquisition","buy property india nri","agricultural land nri","repatriation sale proceeds"],
+    tags:["Property"],
+    summary:"An NRI or OCI wants to acquire or dispose of immovable property in India, or repatriate the sale proceeds.",
+    steps:[
+      "Confirm the property type — NRIs/OCIs can generally acquire residential and commercial property but not agricultural land, plantation property, or farmhouses (except by inheritance).",
+      "For a purchase, payment must come through normal banking channels or NRE/NRO/FCNR account funds — not by foreign currency notes or travellers cheques.",
+      "For a sale, repatriation of proceeds is capped at the original foreign-exchange investment (for up to two such properties) and requires the standard AD-bank documentation and a CA certificate (Form 15CA/15CB) for the tax angle.",
+      "Cross-check FEMA (this Master Direction) against the applicable state's separate agricultural-land restrictions, which don't derive from FEMA at all."
+    ],
+    formsRef:["AD-bank repatriation forms","Form 15CA/15CB (tax)"],
+    citations:["FED MD 12/2015-16 — Acquisition & Transfer of Immovable Property in India"],
+    caution:"Agricultural/plantation land restrictions are absolute (bar inheritance) — this is the most common point where advisors miss a hard prohibition."
+  },
+  {
+    id:"convertible-notes",
+    title:"Issuing convertible notes to a foreign investor (startup)",
+    keywords:["convertible note","cn form","startup foreign investment","notified startup non-resident","safe note foreign investor"],
+    tags:["FDI","Startups"],
+    summary:"A DPIIT-recognised startup wants to issue convertible notes to a non-resident investor.",
+    steps:[
+      "Confirm the issuing company qualifies as a 'startup' under the applicable notification — this route is specific to recognised startups, not all companies.",
+      "Confirm the note terms match the regulatory definition (repayable/convertible into equity within a prescribed period, minimum investment threshold per instrument).",
+      "File the CN Form via FIRMS within 30 days of issuance.",
+      "Track the conversion event separately — conversion into equity triggers its own FC-GPR-style reporting."
+    ],
+    formsRef:["CN Form","FC-GPR (on conversion)"],
+    citations:["NDI Rules 2019","FED MD 11/2017-18 — Foreign Investment in India"],
+    caution:"Confirm the startup-recognition status is still current at the time of issuance, not just at incorporation."
+  },
+  {
+    id:"opi-vs-odi",
+    title:"OPI vs ODI — which route applies?",
+    keywords:["opi overseas portfolio investment","odi vs opi","less than 10 percent","portfolio investment abroad","difference odi opi","control threshold"],
+    tags:["ODI","LRS"],
+    summary:"A resident wants to invest in a foreign entity's listed securities and needs to know whether it's OPI (lighter-touch) or ODI (full framework).",
+    steps:[
+      "Check whether the investment is in listed equity/debt and stays below the direct-investment threshold — if so, it's OPI, reportable more simply and typically routed through LRS for individuals.",
+      "If the investment crosses into a 10%-or-more stake, or brings control/board representation, it's reclassified as ODI regardless of the investor's intent, and the full ODI framework (Form FC, APR, layering test) applies.",
+      "For a corporate investor, confirm whether the entity even has LRS access (it generally doesn't) — corporate portfolio investment abroad has its own separate route distinct from individual LRS-based OPI.",
+      "Re-test the classification if the stake changes over time — crossing the threshold later converts an OPI holding into an ODI obligation going forward."
+    ],
+    formsRef:["OPI reporting (lighter)","Form FC + APR (if reclassified as ODI)"],
+    citations:["OI Rules/Regulations 2022 — OPI and ODI definitions"],
+    caution:"The OPI/ODI line is a bright-line percentage-and-control test, not a subjective one — check it precisely, not by gut feel about 'how much control' the investor intends."
+  }
+];
+
+/* ---------------- RENDER: tabs ---------------- */
+const tabBtns = document.querySelectorAll('.tab-btn');
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+/* ---------------- RENDER: master directions ---------------- */
+const mdList = document.getElementById('mdList');
+masterDirections.forEach(md=>{
+  const el = document.createElement('div');
+  el.className = 'card' + (md.route==='automatic'?' tone-sage':md.route==='approval'?' tone-signal':'');
+  el.innerHTML = `
+    <span class="stamp ${md.route}">${md.route==='automatic'?'Automatic':md.route==='approval'?'Approval<br>needed':'Reporting'}</span>
+    <h3>${md.title}</h3>
+    <div class="meta-row"><span class="meta-chip mono">${md.code}</span><span class="meta-chip">${md.cat}</span><span class="meta-chip">Updated ${md.updated}</span></div>
+    <p>${md.scope}</p>`;
+  mdList.appendChild(el);
+});
+
+const rulesListEl = document.getElementById('rulesList');
+rulesList.forEach(r=>{
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.innerHTML = `<h3>${r.title}</h3><div class="meta-row"><span class="meta-chip mono">${r.code}</span></div><p>${r.scope}</p>`;
+  rulesListEl.appendChild(el);
+});
+
+/* ---------------- RENDER: forms table ---------------- */
+const tbody = document.querySelector('#formsTable tbody');
+forms.forEach(f=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td class="code">${f[0]}</td><td>${f[1]}</td><td>${f[2]}</td><td>${f[3]}</td><td>${f[4]}</td>`;
+  tbody.appendChild(tr);
+});
+
+/* ---------------- RENDER: scenario finder ---------------- */
+const chipRow = document.getElementById('chipRow');
+scenarios.forEach(s=>{
+  const chip = document.createElement('button');
+  chip.className = 'chip';
+  chip.textContent = s.title;
+  chip.addEventListener('click', ()=>{
+    document.getElementById('scenarioSearch').value = s.title;
+    runSearch(s.title);
+  });
+  chipRow.appendChild(chip);
+});
+
+function scoreScenario(s, query){
+  const q = query.toLowerCase().trim();
+  if(!q) return 0;
+  let score = 0;
+  const haystack = (s.title + ' ' + s.summary + ' ' + s.keywords.join(' ')).toLowerCase();
+  s.keywords.forEach(k=>{ if(q.includes(k) || k.includes(q)) score += 6; });
+  if(s.title.toLowerCase().includes(q)) score += 5;
+  q.split(/\s+/).filter(w=>w.length>2).forEach(w=>{ if(haystack.includes(w)) score += 1; });
+  return score;
+}
+
+function renderScenario(s){
+  return `
+    <div class="card">
+      <h3>${s.title}</h3>
+      <div class="tag-row">${s.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <p>${s.summary}</p>
+      <ol class="steps">${s.steps.map(st=>`<li>${st}</li>`).join('')}</ol>
+      <div class="meta-row">${s.formsRef.map(f=>`<span class="meta-chip mono">${f}</span>`).join('')}</div>
+      <div class="cite-row">${s.citations.join(' · ')}</div>
+      <div class="caution-box"><strong>Caution.</strong> ${s.caution}</div>
+    </div>`;
+}
+
+function runSearch(query){
+  const resultsArea = document.getElementById('resultsArea');
+  const resultsMeta = document.getElementById('resultsMeta');
+  if(!query.trim()){
+    resultsMeta.textContent = 'Showing all scenarios';
+    resultsArea.innerHTML = scenarios.map(renderScenario).join('');
+    return;
+  }
+  const scored = scenarios.map(s=>({s, score:scoreScenario(s, query)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+  if(scored.length===0){
+    resultsMeta.textContent = 'No direct match — closest topics below';
+    resultsArea.innerHTML = scenarios.slice(0,3).map(x=>renderScenario(x)).join('');
+    return;
+  }
+  resultsMeta.textContent = `${scored.length} match${scored.length>1?'es':''}`;
+  resultsArea.innerHTML = scored.map(x=>renderScenario(x.s)).join('');
+}
+
+const searchInput = document.getElementById('scenarioSearch');
+searchInput.addEventListener('input', e=>runSearch(e.target.value));
+runSearch('');
+</script>
+</body>
+</html>
